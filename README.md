@@ -1,2 +1,3 @@
-# predict_-slaughter
-Predicts the number of Cow slaughtered.
+## predict slaughter
+
+###Predicts the number of Cow slaughtered.
