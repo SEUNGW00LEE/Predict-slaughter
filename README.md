@@ -1,3 +1,3 @@
 ## Predict slaughter
 
-###Predicts the number of Cow slaughtered.
+### Predicts the number of Cow slaughtered.
