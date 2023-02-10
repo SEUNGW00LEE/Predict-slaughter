@@ -25,19 +25,21 @@ slaughter <- read_xlsx("Dataset/14_22도축.xlsx", sheet = 2) %>%
     month = parse_number(month),
     age = parse_number(age),
     type = "slaughter",
-    age = ifelse(age == 20, "total_20", age)
+    age = ifelse(age == 20, 200, age)
   ) %>% 
   rename("kind" = "구분...2", "gender" = "구분...3")
   
 
+
 breeding_under20 <- breeding %>% 
   mutate(
-    age = ifelse(age <=20, "total_20", age)
+    age = ifelse(age <=20, 200, age)
     ) %>%
   group_by(year, month, kind, gender, age, type) %>% 
   summarise(breeding_count = sum(breeding_count, na.rm=TRUE)) %>% 
-  filter(age == "total_20")
+  filter(age == 200)
 View(breeding)
+View(breeding_under20)
 breeding <- merge(breeding, breeding_under20, all=TRUE)
 
 total <- merge(breeding, slaughter, by=c('year'='year', 'month'='month', 'kind' = 'kind', 'gender'='gender', 'age'='age'), all=TRUE) %>% 
@@ -46,10 +48,8 @@ total <- merge(breeding, slaughter, by=c('year'='year', 'month'='month', 'kind' 
   ) %>% 
   select(-c(type.x,type.y))
 
-View(total)
 test <- total %>% 
-  filter(year == 2022) %>% 
-  View()
+  filter(year == 2022) 
 
 train <- total %>% 
   filter(year != 2022) 
@@ -58,15 +58,16 @@ rate <- train %>%
   group_by(kind, gender, age) %>% 
   summarise(mean_rate = mean(rate, na.rm=TRUE))
 View(rate)
-total %>% 
-  filter(year == 2021 & month == 12) %>% 
+
+
+train %>% 
+  filter(kind=="한우" & gender=="암" & year == 2021 & month == 12) %>% 
+  merge(rate) %>% 
   mutate(
-    year = 2022,
-    month = 1
-  ) %>%  
-  subset(select = c(year, month, gender, age, kind,breeding_count)) %>% 
-  filter(kind=="한우" & gender=="암") ->predictJan 
-  
+    predict_breeding = ifelse(age<=37, lag(breeding_count,n=1, order_by = age), breeding_count)
+  ) %>% 
+  View()
+View(predictJan)  
 predictJan$predict_breeding_count <- lag(predictJan$breeding_count)
 predictJan
 
