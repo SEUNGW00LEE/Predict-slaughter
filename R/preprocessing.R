@@ -54,6 +54,10 @@ test <- total %>%
 train <- total %>% 
   filter(year != 2022) 
 
+
+View(sum_train)
+
+
 rate <- train %>% 
   group_by(kind, gender, age) %>% 
   summarise(mean_rate = mean(rate, na.rm=TRUE))
@@ -113,9 +117,62 @@ scoreFeb <-
 
 scoreFeb
 
-View(result_predictFeb)
+sum_train <- train %>% 
+  group_by(year, month, kind, gender) %>% 
+  summarise(breeding_count =sum(breeding_count, na.rm = TRUE),
+            slaughter_count = sum(slaughter_count, na.rm = TRUE))%>% 
+  mutate(
+    rate = slaughter_count / breeding_count
+  )
+View(sum_train)
+
 library(ggplot2)
 
+sum2021 <- sum_train %>% 
+  filter(year==2021) 
+View(sum2021)
+sum2021$kind_gender <- paste(sum2021$kind, sum2021$gender, sep="-")
+
+sum2021$year_month <- paste(sum2021$year, sum2021$month, sep="_")
+
+sum2021 <- sum2021 %>% 
+  filter(rate != Inf)
+View(sum2021)
+
+ggplot(diamonds, aes(x = carat)) +  geom_histogram()
+
+
+ggplot(sum2021, aes(x=month)) +
+  geom_line(alpha = 0.5, aes(y=rate, color = kind_gender))+ 
+  theme_minimal(base_family = "AppleSDGothicNeo-SemiBold") 
+  
+sum2021 %>% 
+  group_by(year,month) %>% 
+  summarise(slaughter_count = sum(slaughter_count, na.rm = TRUE)) -> total_sum2021
+View(total_sum2021)  
+ggplot(total_sum2021, aes(x=month)) +
+  geom_histogram(alpha = 0.5, aes(y=slaughter_count), stat='identity', fill='skyblue')
+  
 
 
 
+p <- ggplot() + 
+  geom_bar(data=total_sum2021, alpha = 0.3, aes(x=month, y=slaughter_count), stat='identity', fill='skyblue', width = 0.5) +
+  geom_line(data=sum2021,aes(x=month,y=rate*600000,color = kind_gender),alpha = 1) +
+  scale_y_continuous(name = "도축마리",
+                     sec.axis = sec_axis(~./600000 , name="도축율")) +
+  scale_x_continuous(name = "기간", breaks = seq(1, 12, 1), labels = paste0(seq(1, 12, 1), '월')) + 
+  theme_minimal(base_family = "AppleSDGothicNeo-SemiBold") +
+  theme(
+    plot.title = element_text(hjust = 0.5,size=18, color = "royalblue4", face="bold"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(size = 0.1, color = "grey"),
+    panel.grid.minor.y = element_line(size = 0.1, color = "grey")
+    )+
+  labs(
+    title = "도축마리 및 도축율",
+    color = "종류"
+  ) 
+  
+p
