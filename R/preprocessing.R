@@ -64,10 +64,16 @@ train %>%
   filter(kind=="한우" & gender=="암" & year == 2021 & month == 12) %>% 
   merge(rate) %>% 
   mutate(
-    predict_breeding = ifelse(age<=37, lag(breeding_count,n=1, order_by = age), breeding_count)
+    predict_breeding = ifelse(age<=37, lag(breeding_count,n=1, order_by = age), breeding_count),
+    predict_slaughter = predict_breeding * mean_rate
   ) %>% 
+  select(-c(breeding_count, slaughter_count, rate, mean_rate)) -> predictJan
+View(predictJan)
+test %>% 
+  filter(kind == "한우" & gender == "암" & year == 2022 & month == 1) %>%
+  select(slaughter_count) %>%
   View()
-View(predictJan)  
+
 predictJan$predict_breeding_count <- lag(predictJan$breeding_count)
 predictJan
 
