@@ -38,8 +38,8 @@ breeding_under20 <- breeding %>%
   group_by(year, month, kind, gender, age, type) %>% 
   summarise(breeding_count = sum(breeding_count, na.rm=TRUE)) %>% 
   filter(age == 200)
-View(breeding)
-View(breeding_under20)
+
+
 breeding <- merge(breeding, breeding_under20, all=TRUE)
 
 total <- merge(breeding, slaughter, by=c('year'='year', 'month'='month', 'kind' = 'kind', 'gender'='gender', 'age'='age'), all=TRUE) %>% 
@@ -57,28 +57,64 @@ train <- total %>%
 rate <- train %>% 
   group_by(kind, gender, age) %>% 
   summarise(mean_rate = mean(rate, na.rm=TRUE))
-View(rate)
+
 
 
 train %>% 
   filter(kind=="한우" & gender=="암" & year == 2021 & month == 12) %>% 
   merge(rate) %>% 
   mutate(
-    predict_breeding = ifelse(age<=37, lag(breeding_count,n=1, order_by = age), breeding_count),
+    predict_breeding = ifelse(age<=36, lag(breeding_count,n=1, order_by = age), breeding_count),
     predict_slaughter = predict_breeding * mean_rate
   ) %>% 
-  select(-c(breeding_count, slaughter_count, rate, mean_rate)) -> predictJan
-View(predictJan)
+  select(-c(breeding_count, slaughter_count, rate, mean_rate, year, month)) -> predictJan
+
+
 test %>% 
   filter(kind == "한우" & gender == "암" & year == 2022 & month == 1) %>%
-  select(slaughter_count) %>%
-  View()
+  select(-c(rate, year, month))  %>% 
+  merge(predictJan) %>% 
+  mutate(
+    score = (slaughter_count / predict_slaughter) * 100
+  ) -> result_predictJan
+  
+scoreJan <-
+  (sum(result_predictJan$predict_slaughter, na.rm=TRUE) / sum(result_predictJan$slaughter_count, na.rm = TRUE)) * 100
+scoreJan
 
-predictJan$predict_breeding_count <- lag(predictJan$breeding_count)
-predictJan
+predictJan %>% 
+  mutate(
+         predictFeb = ifelse(age<=36, lag(predict_breeding,n=1, order_by = age), predict_breeding),
+         predict_slaughter = ifelse(age<=36, lag(predict_slaughter,n=1, order_by = age), predict_slaughter),
+         predictBr_Sl = predictFeb - predict_slaughter
+  ) -> predictFeb
 
 
+predictFeb %>% 
+  mutate(
+    predictBr_Sl = ifelse(is.na(predictBr_Sl)==TRUE, predictFeb, predictBr_Sl)
+    ) %>% 
+  merge(rate) %>% 
+  select(-c(predict_breeding, predict_slaughter)) %>% 
+  mutate(
+    predict_slaughter = predictBr_Sl * mean_rate
+  ) -> predictFeb
+  
+test %>% 
+  filter(kind == "한우" & gender == "암" & year == 2022 & month == 2) %>%
+  select(-c(rate, year, month))  %>% 
+  merge(predictFeb) %>% 
+  mutate(
+    score = (predict_slaughter/slaughter_count) * 100
+  ) -> result_predictFeb
 
+scoreFeb <-
+  (sum(result_predictFeb$predict_slaughter, na.rm=TRUE) / sum(result_predictFeb$slaughter_count, na.rm = TRUE)) * 100
+
+scoreFeb
+
+View(result_predictFeb)
+library(ggplot2)
 
 
 
