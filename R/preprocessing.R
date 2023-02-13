@@ -54,15 +54,9 @@ test <- total %>%
 train <- total %>% 
   filter(year != 2022) 
 
-
-View(sum_train)
-
-
 rate <- train %>% 
   group_by(kind, gender, age) %>% 
   summarise(mean_rate = mean(rate, na.rm=TRUE))
-
-
 
 train %>% 
   filter(kind=="한우" & gender=="암" & year == 2021 & month == 12) %>% 
@@ -81,10 +75,9 @@ test %>%
   mutate(
     score = (slaughter_count / predict_slaughter) * 100
   ) -> result_predictJan
-  
-scoreJan <-
-  (sum(result_predictJan$predict_slaughter, na.rm=TRUE) / sum(result_predictJan$slaughter_count, na.rm = TRUE)) * 100
-scoreJan
+
+rm(score)
+scoreJan <- (sum(result_predictJan$predict_slaughter, na.rm=TRUE) / sum(result_predictJan$slaughter_count, na.rm = TRUE)) * 100
 
 predictJan %>% 
   mutate(
@@ -115,7 +108,23 @@ test %>%
 scoreFeb <-
   (sum(result_predictFeb$predict_slaughter, na.rm=TRUE) / sum(result_predictFeb$slaughter_count, na.rm = TRUE)) * 100
 
-scoreFeb
+score <- data.frame(Month = c("Jan","Feb"),
+                    Score = c(scoreJan,scoreFeb))
+score$Score <- abs(100-score$Score)
+
+plot_score <- ggplot(score, aes(x=reorder(Month,Score), y=Score, fill=Month)) +
+  geom_col(width=0.7)+
+  geom_text(aes(x=Month, y=Score, label= round(Score)),
+            vjust=-0.6, colour="gray30", size=4) +
+  theme_minimal(base_family = "AppleSDGothicNeo-SemiBold") +
+  ggtitle("예측 도축량과 실제 도축량의 오차율") +
+  theme(
+    legend.position = "none",
+    axis.title.x=element_blank(),
+    axis.title.y=element_blank(),
+    plot.title = element_text(hjust = 0.5,size=18, color = "gray30", face="bold"),
+    )
+plot_score
 
 sum_train <- train %>% 
   group_by(year, month, kind, gender) %>% 
@@ -137,10 +146,6 @@ sum2021$year_month <- paste(sum2021$year, sum2021$month, sep="_")
 
 sum2021 <- sum2021 %>% 
   filter(rate != Inf)
-View(sum2021)
-
-ggplot(diamonds, aes(x = carat)) +  geom_histogram()
-
 
 ggplot(sum2021, aes(x=month)) +
   geom_line(alpha = 0.5, aes(y=rate, color = kind_gender))+ 
