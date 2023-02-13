@@ -80,7 +80,7 @@ test %>%
 
 
 scoreJan <- (sum(result_predictJan$predict_slaughter, na.rm=TRUE) / sum(result_predictJan$slaughter_count, na.rm = TRUE)) * 100
-
+View(predictJan)
 predictJan %>% 
   mutate(
          predictFeb = ifelse(age<=36, lag(predict_breeding,n=1, order_by = age), predict_breeding),
@@ -88,17 +88,17 @@ predictJan %>%
          predictBr_Sl = predictFeb - predict_slaughter
   ) -> predictFeb
 
+View(predictFeb)
 
 predictFeb %>% 
   mutate(
     predictBr_Sl = ifelse(is.na(predictBr_Sl)==TRUE, predictFeb, predictBr_Sl)
     ) %>% 
   merge(rate) %>% 
-  select(-c(predict_breeding, predict_slaughter)) %>% 
   mutate(
     predict_slaughter = predictBr_Sl * mean_rate
   ) -> predictFeb
-  
+
 test %>% 
   filter(kind == "한우" & gender == "암" & year == 2022 & month == 2) %>%
   select(-c(rate, year, month))  %>% 
@@ -107,17 +107,45 @@ test %>%
     score = (predict_slaughter/slaughter_count) * 100
   ) -> result_predictFeb
 
+predictFeb %>% 
+  mutate(
+    predictMar = ifelse(age<=36, lag(predict_breeding,n=1,order_by=age),predict_breeding),
+    predict_slaughter = ifelse(age<=36, lag(predict_slaughter,n=1, order_by = age), predict_slaughter),
+    predictBr_Sl = predictMar - predict_slaughter
+  ) -> predictMar
+
+predictMar %>% 
+  mutate(
+    predictBr_Sl = ifelse(is.na(predictBr_Sl)==TRUE, predictMar, predictBr_Sl)
+  ) %>% 
+  merge(rate) %>% 
+  mutate(
+    Marpredict_slaughter = predictBr_Sl * mean_rate
+  ) -> predictMar
+
+test %>% 
+  filter(kind == "한우" & gender == "암" & year == 2022 & month == 2) %>%
+  select(-c(rate, year, month))  %>% 
+  merge(predictMar) %>% 
+  mutate(
+    score = (predict_slaughter/slaughter_count) * 100
+  ) -> result_predictMar
+
 scoreFeb <-
   (sum(result_predictFeb$predict_slaughter, na.rm=TRUE) / sum(result_predictFeb$slaughter_count, na.rm = TRUE)) * 100
 
-score <- data.frame(Month = c("Jan","Feb"),
-                    Score = c(scoreJan,scoreFeb))
+scoreMar <-
+  (sum(result_predictMar$predict_slaughter, na.rm=TRUE) / sum(result_predictMar$slaughter_count, na.rm = TRUE)) * 100
+
+score <- data.frame(Month = c("Jan","Feb","Mar"),
+                    Score = c(scoreJan,scoreFeb,scoreMar))
 score$Score <- abs(100-score$Score)
 
-JanFebPlot<- ggplot(score, aes(x=reorder(Month,Score), y=Score, fill=Month)) +
+JanFebMarPlot<- ggplot(score, aes(x=Month, y=Score, fill=Month)) +
   geom_col(width=0.7)+
   geom_text(aes(x=Month, y=Score, label= round(Score)),
             vjust=3, colour="white", size=5) +
+  scale_x_discrete(limits=c("Jan", "Feb", "Mar")) + 
   theme_minimal(base_family = "AppleSDGothicNeo-SemiBold") +
   ggtitle("예측 도축량과 실제 도축량의 오차율") +
   theme(
@@ -126,6 +154,8 @@ JanFebPlot<- ggplot(score, aes(x=reorder(Month,Score), y=Score, fill=Month)) +
     axis.title.y=element_blank(),
     plot.title = element_text(hjust = 0.5,size=18, color = 'grey3', face="bold")
     )
+JanFebMarPlot
+
 
 sum_train <- train %>% 
   group_by(year, month, kind, gender) %>% 
@@ -168,6 +198,6 @@ p <- ggplot() +
     )+
   labs(
     title = "도축마리 및 도축율",
-    color = "종류"
+    color = "종별 도축울"
   )
-
+ggsave(p, file="Visualization/도축마리및도축율.png")
