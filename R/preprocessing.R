@@ -2,6 +2,8 @@ library(readxl)
 library(tidyr)
 library(tidyverse)
 library(reshape2)
+library(ggplot2)
+
 getwd()
 setwd("Desktop/Predict-slaughter/")
 rm(list=ls())
@@ -76,7 +78,7 @@ test %>%
     score = (slaughter_count / predict_slaughter) * 100
   ) -> result_predictJan
 
-rm(score)
+
 scoreJan <- (sum(result_predictJan$predict_slaughter, na.rm=TRUE) / sum(result_predictJan$slaughter_count, na.rm = TRUE)) * 100
 
 predictJan %>% 
@@ -112,19 +114,18 @@ score <- data.frame(Month = c("Jan","Feb"),
                     Score = c(scoreJan,scoreFeb))
 score$Score <- abs(100-score$Score)
 
-plot_score <- ggplot(score, aes(x=reorder(Month,Score), y=Score, fill=Month)) +
+JanFebPlot<- ggplot(score, aes(x=reorder(Month,Score), y=Score, fill=Month)) +
   geom_col(width=0.7)+
   geom_text(aes(x=Month, y=Score, label= round(Score)),
-            vjust=-0.6, colour="gray30", size=4) +
+            vjust=3, colour="white", size=5) +
   theme_minimal(base_family = "AppleSDGothicNeo-SemiBold") +
   ggtitle("예측 도축량과 실제 도축량의 오차율") +
   theme(
     legend.position = "none",
     axis.title.x=element_blank(),
     axis.title.y=element_blank(),
-    plot.title = element_text(hjust = 0.5,size=18, color = "gray30", face="bold"),
+    plot.title = element_text(hjust = 0.5,size=18, color = 'grey3', face="bold")
     )
-plot_score
 
 sum_train <- train %>% 
   group_by(year, month, kind, gender) %>% 
@@ -133,13 +134,12 @@ sum_train <- train %>%
   mutate(
     rate = slaughter_count / breeding_count
   )
-View(sum_train)
 
-library(ggplot2)
+
 
 sum2021 <- sum_train %>% 
   filter(year==2021) 
-View(sum2021)
+
 sum2021$kind_gender <- paste(sum2021$kind, sum2021$gender, sep="-")
 
 sum2021$year_month <- paste(sum2021$year, sum2021$month, sep="_")
@@ -147,20 +147,11 @@ sum2021$year_month <- paste(sum2021$year, sum2021$month, sep="_")
 sum2021 <- sum2021 %>% 
   filter(rate != Inf)
 
-ggplot(sum2021, aes(x=month)) +
-  geom_line(alpha = 0.5, aes(y=rate, color = kind_gender))+ 
-  theme_minimal(base_family = "AppleSDGothicNeo-SemiBold") 
-  
+
 sum2021 %>% 
   group_by(year,month) %>% 
   summarise(slaughter_count = sum(slaughter_count, na.rm = TRUE)) -> total_sum2021
-View(total_sum2021)  
-ggplot(total_sum2021, aes(x=month)) +
-  geom_histogram(alpha = 0.5, aes(y=slaughter_count), stat='identity', fill='skyblue')
-  
-
-
-
+   
 p <- ggplot() + 
   geom_bar(data=total_sum2021, alpha = 0.3, aes(x=month, y=slaughter_count), stat='identity', fill='skyblue', width = 0.5) +
   geom_line(data=sum2021,aes(x=month,y=rate*600000,color = kind_gender),alpha = 1) +
@@ -178,6 +169,5 @@ p <- ggplot() +
   labs(
     title = "도축마리 및 도축율",
     color = "종류"
-  ) 
-  
-p
+  )
+
