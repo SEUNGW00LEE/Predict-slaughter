@@ -141,7 +141,7 @@ score <- data.frame(Month = c("Jan","Feb","Mar"),
                     Score = c(scoreJan,scoreFeb,scoreMar))
 score$Score <- abs(100-score$Score)
 
-JanFebMarPlot<- ggplot(score, aes(x=Month, y=Score, fill=Month)) +
+JanFebMarPlot<- ggplot(score, aes(x=Month, y=Score, fill=Month), alpha=0.1) +
   geom_col(width=0.7)+
   geom_text(aes(x=Month, y=Score, label= round(Score)),
             vjust=3, colour="white", size=5) +
@@ -154,7 +154,8 @@ JanFebMarPlot<- ggplot(score, aes(x=Month, y=Score, fill=Month)) +
     axis.title.y=element_blank(),
     plot.title = element_text(hjust = 0.5,size=18, color = 'grey3', face="bold")
     )
-JanFebMarPlot
+
+
 
 
 sum_train <- train %>% 
@@ -200,4 +201,5 @@ p <- ggplot() +
     title = "도축마리 및 도축율",
     color = "종별 도축울"
   )
+p
 ggsave(p, file="Visualization/도축마리및도축율.png")
