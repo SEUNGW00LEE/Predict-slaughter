@@ -67,7 +67,7 @@ predictJan %>%
   
 - 예측한 2022년 1월 도축두수와 2022년 2월,3월 도축두수의 실제 데이터와 비교해 `score = |1 - 예측 도축두수 / 실제 도축두수| * 100`을 구합니다. 이를 그래프로 표현합니다.   
 
-![image](https://user-images.githubusercontent.com/86904141/218401559-e427190a-59fc-44a6-b388-2097b19b0274.png)
+![image](https://user-images.githubusercontent.com/86904141/218403481-1f1e1cf1-d748-4075-8d3d-61ed284807c1.png)
 
 > 1월은 오차가 20%이내로 비교적 안정적이였지만, 2월,3월은 80프로로 매우 커져 예측이 진행되지않았다.   
 
