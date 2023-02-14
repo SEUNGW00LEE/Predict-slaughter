@@ -95,3 +95,11 @@ predictJan %>%
 ### gganimate를 사용한 월별, 종별 도축두수 animation
 
 ![gganimate_월별도축두수](https://user-images.githubusercontent.com/86904141/218668587-a39d3c64-c9e8-4bff-90fd-9173fbba3ec4.gif)
+
+-----
+
+###Feedback
+
+- **자기상관**
+
+-- **명절있는 달을 색깔을 바꿔 차이점을 명확히 파악할 수 있도록 변경**
