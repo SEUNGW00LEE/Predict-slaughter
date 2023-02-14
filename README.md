@@ -79,14 +79,19 @@ predictJan %>%
 
 ![도축마리및도축율](https://user-images.githubusercontent.com/86904141/218397183-3684f3db-592a-4e0f-b6c8-fcbfccda4814.png)
 
+-----
+### develop 사항
+
+- **도축두수가 월별로 도축이 몇 % 차지하는지 확인**
 
 
-**도축두수가 월별로 도축이 몇 % 차지하는지 확인**
+- **종별, 개월별로 증감을 확인하여 예측**
 
 
-**종별, 개월별로 증감을 확인하여 예측**
+- **이 후, 추가적인 feature을 통해 machine learning**
 
+------
 
-**이 후, 추가적인 feature을 통해 machine learning**
+### gganimate를 사용한 월별, 종별 도축두수 animation
 
-
+![gganimate_월별도축두수](https://user-images.githubusercontent.com/86904141/218668587-a39d3c64-c9e8-4bff-90fd-9173fbba3ec4.gif)
