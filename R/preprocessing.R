@@ -80,7 +80,8 @@ test %>%
 
 
 scoreJan <- (sum(result_predictJan$predict_slaughter, na.rm=TRUE) / sum(result_predictJan$slaughter_count, na.rm = TRUE)) * 100
-View(predictJan)
+
+
 predictJan %>% 
   mutate(
          predictFeb = ifelse(age<=36, lag(predict_breeding,n=1, order_by = age), predict_breeding),
@@ -88,7 +89,7 @@ predictJan %>%
          predictBr_Sl = predictFeb - predict_slaughter
   ) -> predictFeb
 
-View(predictFeb)
+
 
 predictFeb %>% 
   mutate(
@@ -203,3 +204,77 @@ p <- ggplot() +
   )
 p
 ggsave(p, file="Visualization/도축마리및도축율.png")
+
+
+
+train %>% 
+  group_by(year, month, kind, gender) %>% 
+  summarise(total_slaughter = sum(slaughter_count, na.rm = TRUE)) %>% 
+  filter(year==2021) -> sum_slaughter_2021
+
+train %>% 
+  group_by(year, month, kind) %>% 
+  summarise(total_slaughter = sum(slaughter_count, na.rm = TRUE)) -> year_month_sum
+
+
+  
+
+sum_slaughter_2021 %>% 
+  group_by(year, month) %>% 
+  summarise(month_slaughter = sum(total_slaughter, na.rm=TRUE)) %>% 
+  mutate(
+    month_rate = (month_slaughter / sum(month_slaughter, na.rm=TRUE))* 100
+  ) %>% 
+  select(month,month_rate) -> month_rate_2021
+
+ggplot(
+  data = sum_slaughter_2021,
+  aes(x=month)
+) +
+  geom_bar(alpha=0.5, aes(y=total_slaughter, fill=kind),position='stack', stat="identity") +
+  theme_minimal(base_family = "AppleSDGothicNeo-SemiBold") +
+  scale_x_continuous(name = "기간", breaks = seq(1, 12, 1), labels = paste0(seq(1, 12, 1), '월')) +
+  geom_text(
+    data = month_rate_2021,
+    aes(label=paste0(round(month_rate,1),"%"), y=sum_slaughter_2021$total_slaughter)
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5,size=18, color = "royalblue4", face="bold"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(size = 0.1, color = "grey"),
+    panel.grid.minor.y = element_line(size = 0.1, color = "grey")
+  )
+
+library(gganimate)
+
+ani <- ggplot(data = year_month_sum, aes(x=month)) +
+  geom_bar(alpha=0.5, aes(y=total_slaughter,fill=kind),position='stack',stat='identity') +
+  theme_minimal(base_family = "AppleSDGothicNeo-SemiBold") +
+  scale_x_continuous(name = "기간", breaks = seq(1, 12, 1), labels = paste0(seq(1, 12, 1), '월')) +
+  scale_y_continuous(breaks=seq(0,120000,15000), labels = scales::comma)+
+  theme(
+    plot.title = element_text(hjust = 0.5,size=18, color = "royalblue4", face="bold"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_line(size = 0.1, color = "grey"),
+    panel.grid.minor.y = element_line(size = 0.1, color = "grey")
+  ) +
+  transition_states(year,
+                    transition_length=40, #총 시간
+                    state_length=10)+
+  labs(
+    title = '{closest_state}년 월별 도축두수',
+    subtitle = '2014년-2021년',
+    caption = '축산물이력제 데이터랩',
+    y= "도축두수",
+    fill = "종"
+  )+
+ease_aes('quartic-in-out') +
+  enter_fade()
+ani
+ani <-animate(plot=ani, nframes=400, end_pause = 20, width=1080, height=720)  
+anim_save(filename = "Visualization/gganimate_월별도축두수.gif",
+          animation = ani)
+ani
+
