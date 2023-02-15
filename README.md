@@ -94,7 +94,9 @@ predictJan %>%
 
 ### gganimate를 사용한 월별, 종별 도축두수 animation
 
-![gganimate_월별도축두수](https://user-images.githubusercontent.com/86904141/218668587-a39d3c64-c9e8-4bff-90fd-9173fbba3ec4.gif)
+![월별도축그래프](https://user-images.githubusercontent.com/86904141/218952979-dcf53ecb-d679-4511-8f0b-ddd325f08787.gif)
+
+
 
 -----
 
