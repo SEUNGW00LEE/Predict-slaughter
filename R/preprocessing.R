@@ -224,7 +224,6 @@ year_month_sum %>%
 
 # 월별 도축두수 animation + 월별 rate
 
-View(total_rate)
 library(gganimate)
 
 ani <- ggplot(data = year_month_sum, aes(x=month)) +
@@ -233,11 +232,13 @@ ani <- ggplot(data = year_month_sum, aes(x=month)) +
   scale_x_continuous(name = "기간", breaks = seq(1, 12, 1), labels = paste0(seq(1, 12, 1), '월')) +
   scale_y_continuous(breaks=seq(0,120000,15000), labels = scales::comma)+
   theme(
-    plot.title = element_text(hjust = 0.5,size=18, color = "royalblue4", face="bold"),
+    plot.title = element_text(hjust = 0.5,size=18, color = "royalblue3", face="bold"),
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     panel.grid.major.y = element_line(size = 0.1, color = "grey"),
-    panel.grid.minor.y = element_line(size = 0.1, color = "grey")
+    panel.grid.minor.y = element_line(size = 0.1, color = "grey"),
+    axis.text.x = element_text(size = 12, face = "bold"),
+    axis.text.y = element_text(size = 12, face = "bold")
   ) +
   transition_states(year,
                     transition_length=40, #총 시간
@@ -258,4 +259,5 @@ ani
 
 ani <-animate(plot=ani, nframes=400, end_pause = 20, width=1080, height=720)  
 
+anim_save(ani, file="Visualization/월별도축그래프.gif")
 
