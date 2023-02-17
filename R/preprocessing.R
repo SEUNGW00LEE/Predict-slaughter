@@ -254,13 +254,25 @@ ease_aes('quartic-in-out') +
 # ani <-animate(plot=ani, nframes=400, end_pause = 20, width=1080, height=720)  
 # anim_save(ani, file="Visualization/월별도축그래프.gif")
 
-View(c(total_rate, total_rate.ts))
+# 자기상관을 통해 예측
 
-total_rate %>% 
-  select(-str_slaughter_rate) ->total_rate_acf
+total_rate %>%  ungroup %>% #str_slaughter_rate 삭제
+  select(-c(str_slaughter_rate, year,month)) -> predict_slaughter
+View(predict_slaughter)
 
-  
-ts(data=total_rate_acf, start=c(2014,1),frequency = 12) -> total_rate.ts
-  
-View(total_rate.ts)
-plot(total_rate.ts)
+ts(data=predict_slaughter, start=c(2014,1),frequency = 12)  -> predict_slaughter
+library(TTR)
+library(forecast)
+
+
+# predict 는 계절요인이다.
+
+#install.packages("fpp2")
+library(fpp2)
+
+
+predict_slaughter.decompose <- decompose(predict_slaughter)
+
+plot(predict_slaughter.decompose)
+
+View(predict.decompose)
