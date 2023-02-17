@@ -257,7 +257,7 @@ ease_aes('quartic-in-out') +
 # 자기상관을 통해 예측
 
 total_rate %>%  ungroup %>% #str_slaughter_rate 삭제
-  select(-c(str_slaughter_rate, year,month)) -> predict_slaughter
+  select(month_slaughter) -> predict_slaughter
 View(predict_slaughter)
 
 ts(data=predict_slaughter, start=c(2014,1),frequency = 12)  -> predict_slaughter
@@ -265,7 +265,7 @@ library(TTR)
 library(forecast)
 
 
-# predict 는 계절요인이다.
+
 
 #install.packages("fpp2")
 library(fpp2)
@@ -274,5 +274,19 @@ library(fpp2)
 predict_slaughter.decompose <- decompose(predict_slaughter)
 
 plot(predict_slaughter.decompose)
+# predict 는 계절요인이다.
+# 계절요인을 삭제함으로써 정상성 시계열 자료로 만든다.
 
-View(predict.decompose)
+
+plot(predict_slaughter - predict_slaughter.decompose$seasonal)
+
+#불규칙요인만 출력
+plot(predict_slaughter - predict_slaughter.decompose$seasonal - predict_slaughter.decompose$trend)
+
+auto.arima(predict_slaughter)
+
+predict_slaughter.arima <- arima(predict_slaughter, order=c(2,1,2))
+predict_slaughter.arima
+
+predict_slaughter.forecast <- forecast(predict_slaughter.arima, h=10)
+plot(predict_slaughter.forecast)
