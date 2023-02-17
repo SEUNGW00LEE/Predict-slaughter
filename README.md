@@ -104,4 +104,45 @@ predictJan %>%
 
 - **자기상관**
 
+**시계열데이터 생성**
+
+```R
+ts(data=predict_slaughter, start=c(2014,1),frequency = 12)  -> predict_slaughter
+```
+
+![image](https://user-images.githubusercontent.com/86904141/219692078-10db519d-33b2-4446-bd20-1f5e7f451c88.png)
+
+```R
+predict_slaughter.decompose <- decompose(predict_slaughter)
+plot(predict_slaughter.decompose)
+````
+
+**계절요인(seasonal)을 삭제한 그래프**
+```R
+plot(predict_slaughter - predict_slaughter.decompose$seasonal)
+```
+![image](https://user-images.githubusercontent.com/86904141/219694098-6d22f30b-23e9-4611-98b7-00956352ec9d.png)
+
+**불규칙요인만 출력**
+```R
+plot(predict_slaughter - predict_slaughter.decompose$seasonal - predict_slaughter.decompose$trend)
+```
+![image](https://user-images.githubusercontent.com/86904141/219694627-a127006e-b7c3-4b63-bfd0-6275a63ffaba.png)
+
+**forecast() 를 사용하여 예측 그래프 생성
+
+```R
+auto.arima(predict_slaughter)
+
+predict_slaughter.arima <- arima(predict_slaughter, order=c(2,1,2))
+predict_slaughter.arima
+
+predict_slaughter.forecast <- forecast(predict_slaughter.arima, h=10)
+plot(predict_slaughter.forecast)
+```
+
+![image](https://user-images.githubusercontent.com/86904141/219696129-6b31c30d-e2ae-46f3-8e9d-e6ebb832bbbf.png)
+![image](https://user-images.githubusercontent.com/86904141/219696737-0a528d04-6edf-4f90-8ae7-e3002f8808b6.png)
+
+
 - **명절있는 달을 색깔을 바꿔 차이점을 명확히 파악할 수 있도록 변경**
