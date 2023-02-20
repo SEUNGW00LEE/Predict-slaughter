@@ -221,72 +221,73 @@ year_month_sum %>%
 
 library(gganimate)
 
-ani <- ggplot(data = year_month_sum, aes(x=month)) +
-  geom_bar(alpha=0.5, aes(y=total_slaughter,fill=kind),position='stack',stat='identity') +
-  theme_minimal(base_family = "AppleSDGothicNeo-SemiBold") +
-  scale_x_continuous(name = "기간", breaks = seq(1, 12, 1), labels = paste0(seq(1, 12, 1), '월')) +
-  scale_y_continuous(breaks=seq(0,120000,15000), labels = scales::comma)+
-  theme(
-    plot.title = element_text(hjust = 0.5,size=18, color = "royalblue3", face="bold"),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.grid.major.y = element_line(size = 0.1, color = "grey"),
-    panel.grid.minor.y = element_line(size = 0.1, color = "grey"),
-    axis.text.x = element_text(size = 12, face = "bold"),
-    axis.text.y = element_text(size = 12, face = "bold")
-  ) +
-  transition_states(year,
-                    transition_length=40, #총 시간
-                    state_length=10)+
-  geom_text(data = total_rate,
-            aes(x=month,y=month_slaughter,label=str_slaughter_rate),
-            vjust=-1, hjust=0.5)+
-  labs(
-    title = '{closest_state}년 월별 도축두수',
-    subtitle = '2014년-2021년',
-    caption = '축산물이력제 데이터랩',
-    y= "도축두수",
-    fill = "종"
-  )+
-ease_aes('quartic-in-out') +
-  enter_fade()
+# ani <- ggplot(data = year_month_sum, aes(x=month)) +
+#   geom_bar(alpha=0.5, aes(y=total_slaughter,fill=kind),position='stack',stat='identity') +
+#   theme_minimal(base_family = "AppleSDGothicNeo-SemiBold") +
+#   scale_x_continuous(name = "기간", breaks = seq(1, 12, 1), labels = paste0(seq(1, 12, 1), '월')) +
+#   scale_y_continuous(breaks=seq(0,120000,15000), labels = scales::comma)+
+#   theme(
+#     plot.title = element_text(hjust = 0.5,size=18, color = "royalblue3", face="bold"),
+#     panel.grid.major = element_blank(),
+#     panel.grid.minor = element_blank(),
+#     panel.grid.major.y = element_line(size = 0.1, color = "grey"),
+#     panel.grid.minor.y = element_line(size = 0.1, color = "grey"),
+#     axis.text.x = element_text(size = 12, face = "bold"),
+#     axis.text.y = element_text(size = 12, face = "bold")
+#   ) +
+#   transition_states(year,
+#                     transition_length=40, #총 시간
+#                     state_length=10)+
+#   geom_text(data = total_rate,
+#             aes(x=month,y=month_slaughter,label=str_slaughter_rate),
+#             vjust=-1, hjust=0.5)+
+#   labs(
+#     title = '{closest_state}년 월별 도축두수',
+#     subtitle = '2014년-2021년',
+#     caption = '축산물이력제 데이터랩',
+#     y= "도축두수",
+#     fill = "종"
+#   )+
+# ease_aes('quartic-in-out') +
+#   enter_fade()
 # ani
 # ani <-animate(plot=ani, nframes=400, end_pause = 20, width=1080, height=720)  
 # anim_save(ani, file="Visualization/월별도축그래프.gif")
 
-# 자기상관을 통해 예측
+total_rate %>% 
+  ungroup() %>% 
+  select(-c(str_slaughter_rate, year, month, slaughter_rate)) ->total_rate_acf
+  
+ts(data=total_rate_acf, start=c(2014,1),frequency = 12) -> total_rate
+plot(total_rate)
 
-total_rate %>%  ungroup %>% #str_slaughter_rate 삭제
-  select(month_slaughter) -> predict_slaughter
-View(predict_slaughter)
+total_rate.decompose <- decompose(total_rate)
+plot(total_rate)
+total_rate.diff_1 <- diff(total_rate, differences=1)
+plot(total_rate.diff_1)
+total_rate.diff_2 <- diff(total_rate, differences=2)
+plot(total_rate.diff_2)
+total_rate.diff_3 <- diff(total_rate, differences=3)
+plot(total_rate.diff_3)
+par(mfrow=c(3,1))
+plot(total_rate.diff_1, main = "diff=1", cex.main=2.5)
+plot(total_rate.diff_2, main = "diff=2", cex.main=2.5)
+plot(total_rate.diff_3, main = "diff=3", cex.main=2.5)
 
-ts(data=predict_slaughter, start=c(2014,1),frequency = 12)  -> predict_slaughter
-library(TTR)
+acf(total_rate, main="acf", col='red')
+pacf(total_rate, main="pacf", col='red')
+plot(total_rate.diff_1, main = "diff=1", cex.main=2.5)
+
+plot(total_rate)
+diff <- diff(total_rate)
+plot(diff)
+
 library(forecast)
 
+arima <- auto.arima(total_rate)
+arima <- Arima(total_rate)
+arima
 
+total_rate %>% diff %>% ggtsdisplay(main="")
 
-
-#install.packages("fpp2")
-library(fpp2)
-
-
-predict_slaughter.decompose <- decompose(predict_slaughter)
-
-plot(predict_slaughter.decompose)
-# predict 는 계절요인이다.
-# 계절요인을 삭제함으로써 정상성 시계열 자료로 만든다.
-
-
-plot(predict_slaughter - predict_slaughter.decompose$seasonal)
-
-#불규칙요인만 출력
-plot(predict_slaughter - predict_slaughter.decompose$seasonal - predict_slaughter.decompose$trend)
-
-auto.arima(predict_slaughter)
-
-predict_slaughter.arima <- arima(predict_slaughter, order=c(2,1,2))
-predict_slaughter.arima
-
-predict_slaughter.forecast <- forecast(predict_slaughter.arima, h=10)
-plot(predict_slaughter.forecast)
+fit_1 <- Arima(total_rate)
