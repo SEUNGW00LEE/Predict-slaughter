@@ -143,8 +143,14 @@ plot(predict_slaughter.forecast)
 
 ![image](https://user-images.githubusercontent.com/86904141/220284987-f1a5b9f5-8b45-4ede-87cc-dd1bafe07d87.png)
 
+**diff = 2로 결정**
 
+**diff=2의 decompose**
 
+![image](https://user-images.githubusercontent.com/86904141/220288571-c4ef496f-3ed9-4f42-bd20-e935d36e04c4.png)
+
+**diff=2의 seasonal 제거 그래프**
+![image](https://user-images.githubusercontent.com/86904141/220291856-97b42f0c-3ae5-4da5-b74f-11a2e7d2dc4d.png)
 
 
 
