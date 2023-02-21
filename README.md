@@ -123,13 +123,8 @@ plot(predict_slaughter - predict_slaughter.decompose$seasonal)
 ```
 ![image](https://user-images.githubusercontent.com/86904141/219694098-6d22f30b-23e9-4611-98b7-00956352ec9d.png)
 
-**불규칙요인만 출력**
-```R
-plot(predict_slaughter - predict_slaughter.decompose$seasonal - predict_slaughter.decompose$trend)
-```
-![image](https://user-images.githubusercontent.com/86904141/219694627-a127006e-b7c3-4b63-bfd0-6275a63ffaba.png)
 
-**forecast() 를 사용하여 예측 그래프 생성
+**forecast() 를 사용하여 예측 그래프 생성**
 
 ```R
 auto.arima(predict_slaughter)
@@ -140,9 +135,17 @@ predict_slaughter.arima
 predict_slaughter.forecast <- forecast(predict_slaughter.arima, h=10)
 plot(predict_slaughter.forecast)
 ```
-
 ![image](https://user-images.githubusercontent.com/86904141/219696129-6b31c30d-e2ae-46f3-8e9d-e6ebb832bbbf.png)
 ![image](https://user-images.githubusercontent.com/86904141/219696737-0a528d04-6edf-4f90-8ae7-e3002f8808b6.png)
+
+
+#### diff = 1, 2, 3, log 에 따른 차이 
+
+![image](https://user-images.githubusercontent.com/86904141/220284987-f1a5b9f5-8b45-4ede-87cc-dd1bafe07d87.png)
+
+
+
+
 
 
 - **명절있는 달을 색깔을 바꿔 차이점을 명확히 파악할 수 있도록 변경**
