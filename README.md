@@ -152,6 +152,31 @@ plot(predict_slaughter.forecast)
 **diff=2의 seasonal 제거 그래프**
 ![image](https://user-images.githubusercontent.com/86904141/220291856-97b42f0c-3ae5-4da5-b74f-11a2e7d2dc4d.png)
 
+**diff=2,seasonal 제거의 acf **
+![image](https://user-images.githubusercontent.com/86904141/220296876-4eef6dc3-3618-42bb-9250-ec42fbef2bcb.png)
+
+**diff=2, seasonal 제거의 arima**
+
+```R
+ARIMA(1,0,2)(1,0,0)[12] with zero mean 
+
+Coefficients:
+          ar1      ma1     ma2     sar1
+      -0.2666  -1.8027  0.8208  -0.4195
+s.e.   0.1160   0.0728  0.0709   0.1064
+
+sigma^2 = 68219107:  log likelihood = -983.95
+AIC=1977.89   AICc=1978.57   BIC=1990.61
+```
+**forecast를 통해 6개월 예측**
+
+```R
+fore <- forecast(model)
+fore2 <- forecast(model, h = 6)
+plot(fore)
+plot(fore2)
+```
+![image](https://user-images.githubusercontent.com/86904141/220309421-f0d6d254-84d8-4023-9902-db5b6455a1b2.png)
 
 
 - **명절있는 달을 색깔을 바꿔 차이점을 명확히 파악할 수 있도록 변경**
