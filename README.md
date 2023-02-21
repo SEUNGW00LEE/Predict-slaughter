@@ -176,7 +176,7 @@ fore2 <- forecast(model, h = 6)
 plot(fore)
 plot(fore2)
 ```
-![image](https://user-images.githubusercontent.com/86904141/220309421-f0d6d254-84d8-4023-9902-db5b6455a1b2.png)
+![image](https://user-images.githubusercontent.com/86904141/220309678-e9a107cf-b59d-449a-bf0c-a2a25c43da89.png)
 
 
 - **명절있는 달을 색깔을 바꿔 차이점을 명확히 파악할 수 있도록 변경**
