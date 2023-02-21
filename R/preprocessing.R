@@ -254,40 +254,67 @@ library(gganimate)
 # ani <-animate(plot=ani, nframes=400, end_pause = 20, width=1080, height=720)  
 # anim_save(ani, file="Visualization/월별도축그래프.gif")
 
+par(mfrow=c(1,5))
+
 total_rate %>% 
   ungroup() %>% 
   select(-c(str_slaughter_rate, year, month, slaughter_rate)) ->total_rate_acf
   
 ts(data=total_rate_acf, start=c(2014,1),frequency = 12) -> total_rate
+
+log <- diff(log(total_rate))
+
 plot(total_rate)
+plot(total_rate.diff_1, main = "diff=1")
+plot(total_rate.diff_2, main = "diff=2")
+plot(total_rate.diff_3, main = "diff=3")
+plot(log, main = "log")
 
 total_rate.decompose <- decompose(total_rate)
 plot(total_rate)
+plot(total_rate.decompose)
+total_rate.diff <- diff(total_rate)
 total_rate.diff_1 <- diff(total_rate, differences=1)
 plot(total_rate.diff_1)
 total_rate.diff_2 <- diff(total_rate, differences=2)
 plot(total_rate.diff_2)
 total_rate.diff_3 <- diff(total_rate, differences=3)
 plot(total_rate.diff_3)
-par(mfrow=c(3,1))
+
 plot(total_rate.diff_1, main = "diff=1", cex.main=2.5)
 plot(total_rate.diff_2, main = "diff=2", cex.main=2.5)
 plot(total_rate.diff_3, main = "diff=3", cex.main=2.5)
+
+total_rate.diff_2.decompose <- decompose(total_rate.diff_2)
+
+par(mfrow=c(1,1))
+
+total_rate.decompose <- decompose(total_rate)
+total_rate <- total_rate.diff_2
+plot(total_rate)
+plot(total_rate.diff_2.decompose)
+plot(total_rate - total_rate.decompose$seasonal, main = "remove seasonal")
 
 acf(total_rate, main="acf", col='red')
 pacf(total_rate, main="pacf", col='red')
 plot(total_rate.diff_1, main = "diff=1", cex.main=2.5)
 
 plot(total_rate)
-diff <- diff(total_rate)
+total_rate_remove_seasonal <- total_rate - total_rate.decompose$seasonal
+acf(total_rate_remove_seasonal, main="acf", col="red")
+
+
+
 plot(diff)
 
 library(forecast)
 
-arima <- auto.arima(total_rate)
-arima <- Arima(total_rate)
+arima <- auto.arima(total_rate_remove_seasonal)
 arima
 
-total_rate %>% diff %>% ggtsdisplay(main="")
-
-fit_1 <- Arima(total_rate)
+par(mfrow=c(1,2))
+model <- arima(total_rate_remove_seasonal, order= c(1,0,2))
+fore <- forecast(model)
+fore2 <- forecast(model, h = 6)
+plot(fore)
+plot(fore2)
