@@ -178,5 +178,7 @@ plot(fore2)
 ```
 ![image](https://user-images.githubusercontent.com/86904141/220309678-e9a107cf-b59d-449a-bf0c-a2a25c43da89.png)
 
+## 예측값과 실측값을 비교해 
+
 
 - **명절있는 달을 색깔을 바꿔 차이점을 명확히 파악할 수 있도록 변경**
